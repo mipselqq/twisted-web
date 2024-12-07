@@ -4,7 +4,7 @@ const MAX_SYMBOLS = 500000;
 const TOKEN = "AIzaSyATBXajvzQLTDHEQbcpq0Ihe0vWDHmO520";
 const BUFFER_FILENAME = process.argv[2] || "page.html";
 const FROM_LANG = process.argv[3] || "ru";
-const PIPELINE_LENGTH = Number(process.argv[4]) || 50;
+const PIPELINE_LENGTH = Number(process.argv[4]) || 100;
 
 const TRANSLATION_PIPELINE = [
     "zh-CN", // Simplified Chinese
@@ -56,8 +56,55 @@ const TRANSLATION_PIPELINE = [
     "tt",    // Tatar
     "mn",    // Mongolian
     "ga",    // Irish
-    "haw"    // Hawaiian
-].slice(0, PIPELINE_LENGTH + 1);
+    "haw",   // Hawaiian
+    "sq",    // Albanian
+    "hr",    // Croatian
+    "mk",    // Macedonian
+    "et",    // Estonian
+    "ne",    // Nepali
+    "la",    // Latin
+    "is",    // Icelandic
+    "cy",    // Welsh
+    "tl",    // Tagalog
+    "te",    // Telugu
+    "pa",    // Punjabi
+    "mr",    // Marathi
+    "si",    // Sinhala
+    "oc",    // Occitan
+    "ka",    // Georgian
+    "eu",    // Basque
+    "hy",    // Armenian
+    "bs",    // Bosnian
+    "sr",    // Serbian
+    "hr",    // Croatian
+    "se",    // Swedish
+    "zu",    // Zulu
+    "la",    // Latin
+    "ja",    // Japanese
+    "el",    // Greek
+    "zh",    // Chinese
+    "ht",    // Haitian Creole
+    "ky",    // Kyrgyz
+    "sr",    // Serbian
+    "sq",    // Albanian
+    "lo",    // Lao
+    "si",    // Sinhala
+    "tk",    // Turkmen
+    "rw",    // Kinyarwanda
+    "so",    // Somali
+    "haw",   // Hawaiian
+    "jv",    // Javanese
+    "haw",   // Hawaiian
+    "ml",    // Malayalam
+    "km",    // Khmer
+    "lv",    // Latvian
+    "be",    // Belarusian
+    "ml",    // Malayalam
+    "sq",    // Albanian
+    "fi",    // Finnish
+    "bs",    // Bosnian
+    "pt",    // Portuguese
+].slice(0, PIPELINE_LENGTH);
 
 let html = (await readHtmlFromFile(BUFFER_FILENAME));
 let prevLang = FROM_LANG;
@@ -75,14 +122,13 @@ try {
 
         langNo++;
 
-        const translatedChunks = [];
+        const translationPromises = [];
         for (let i = 0; i < chunks.length; i++) {
-            console.log(`${prevLang} -> ${lang}: chunk ${i + 1} of ${chunks.length}`);
-            const translatedChunk = await googleTranslate(chunks[i], prevLang, lang, TOKEN);
-            translatedChunks.push(translatedChunk);
+            const translationPromise = googleTranslate(chunks[i], prevLang, lang, TOKEN);
+            translationPromises.push(translationPromise);
         }
 
-        html = translatedChunks.join("");
+        html = (await Promise.all(translationPromises)).join("");
         prevLang = lang;
     }
 
